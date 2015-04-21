@@ -72,7 +72,7 @@
                 (.5 0 0 0 .5))
 
                 ;; backward
-                ((.5 0 0 0 .5)
+               ((.5 0 0 0 .5)
                 (.5 .5 0 0 0)
                 (0 .5 .5 0 0)
                 (0 0 .5 .5 0)
@@ -87,7 +87,7 @@ have a 1/2 probability of accidentally staying put."
 
 (defun action-probability (new-state old-state action)
         "Returns the probability that, given an action and 
-old state, the new state will be achieved"
+old state, the new state will be achieved" ;;returns p(newstate|oldstate, action)
         (aref *action-model* 
                 (position action *actions*)
                 (position old-state *states*)
@@ -158,12 +158,17 @@ in -body- is appended to a list.  The full list is then returned."
 ;;;;; Given our simple model above, these beliefs will take the form '(p0 p1 p2 p3 p4),
 ;;;;; which is just a table of probabilities, one per state.
 
-(defun action-probabilities (new-state action)
+(defun action-probabilities (new-state action);; returns p(new-state|oldState,action) for all old states
   "Given a new state and an action, returns a list of probabilities, one
 per old state, of the probability of transitioning to the new state from
 that old state given the action"
-
-;;; IMPLEMENT ME
+;; get sta
+	;;action-probability (new-state old-state action)
+	(let ((n -1))
+		(gather (count (states)) (incf n) (action-probability new-state n action))
+	)
+		
+		;;; IMPLEMENT ME
 
 )
 
@@ -173,7 +178,7 @@ per state, of the probability of receiving that sensor value given the state"
 
 ;;; IMPLEMENT ME
 
-)        
+)
 
 (defun bayes-filter (action sensor previous-beliefs)
         "Given a previous belief table, an action, and a sensor 
@@ -182,8 +187,27 @@ might possibly be.  Belief tables are simply lists of the form
 '(p1 p2 p3 p4 p5 ...) where p1 is the probability for the first 
 state, p2 is the probability for the second state, and so on."
 
-;;; IMPLEMENT ME
-
+	;;; IMPLEMENT ME
+	
+	
+	(let ((current-beliefs (copy-list previous-beliefs)))
+		(setf current-beliefs (mapcar '- previous-beliefs  previous-beliefs)) ;; i want it all zeros but the same size as previous beliefs, easiest way to do it i could think of, not efficient
+		(print "current beliefs are")
+		(print current-beliefs)
+		(print "previous beliefs are")
+		(print previous-beliefs)
+		;;call action probabilities, once for each previous belief. 
+		(dotimes (n (count previous-beliefs))
+			(setf (nth n current-beliefs) (+ current-beliefs (action-probabilities n action))))
+	
+		(print "after summation beliefs")
+		(print current-beliefs)
+		;;make these your current beliefs
+		
+		;;call sensor-probabilities
+		
+		;; apply sensor probabilities to current beliefs
+	)
 )
 
 
@@ -363,3 +387,15 @@ particle is simply a state."
     (setf b (particle-filter :backward :odd b))
     (format t "Particle Filter Results: ~a" (normalize (counts b)))))
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+(defun bayes-filter-test ()
+
+)
