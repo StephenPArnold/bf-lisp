@@ -175,7 +175,9 @@ that old state given the action"
 (defun sensor-probabilities (sensor)
   "Given a sensor value, returns a list of probabilities, one
 per state, of the probability of receiving that sensor value given the state"
-
+;;(defun sensor-probability (sensor state))
+	(let ((n -1))
+		(gather (length (states)) (incf n) (sensor-probability sensor n)))
 ;;; IMPLEMENT ME
 
 )
@@ -204,7 +206,9 @@ state, p2 is the probability for the second state, and so on."
 		(print "after summation beliefs")
 		(print current-beliefs)
 		;;make these your current beliefs
-		
+		(setf current-beliefs (mapcar '* (sensor-probabilities sensor) current-beliefs))
+		(print "fina result after evidence:")
+		(print current-beliefs)	
 		;;call sensor-probabilities
 		
 		;; apply sensor probabilities to current beliefs
@@ -403,7 +407,9 @@ particle is simply a state."
 	(print (action-probabilities 0 :backward)) 
 	;;(print (action-probability ))  	
 	;;action-probability (new-state old-state action)
-      
-	(bayes-filter :forward :even '(.8 .05 .05 .05 .05))
+	(print "sensor test")
+	(print (sensor-probabilities :odd))      
+	(bayes-filter :forward :odd '(.5 .0 .5 .0 .0))
+
 )
 (bayes-filter-test)
