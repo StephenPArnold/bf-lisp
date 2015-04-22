@@ -53,7 +53,6 @@
 ;;;;;;; sensor-probability functions instead.  That way if you change your model
 ;;;;;;; you just need to resubmit those three functions.
 
-
 (defparameter *actions* '(:forward :backward))
 (defparameter *states* '(0 1 2 3 4))
 (defparameter *sensors* '(:even :odd))
@@ -164,12 +163,13 @@ per old state, of the probability of transitioning to the new state from
 that old state given the action"
 ;; get sta
 	;;action-probability (new-state old-state action)
+	(print "args are")
+	(print new-state)
+	(print action)
+	(print "/")
 	(let ((n -1))
-		(gather (count (states)) (incf n) (action-probability new-state n action))
+		(gather (length (states)) (incf n) (action-probability n new-state action))
 	)
-		
-		;;; IMPLEMENT ME
-
 )
 
 (defun sensor-probabilities (sensor)
@@ -197,9 +197,10 @@ state, p2 is the probability for the second state, and so on."
 		(print "previous beliefs are")
 		(print previous-beliefs)
 		;;call action probabilities, once for each previous belief. 
-		(dotimes (n (count previous-beliefs))
-			(setf (nth n current-beliefs) (+ current-beliefs (action-probabilities n action))))
-	
+		(dotimes (n (length (states)))
+			(setf current-beliefs (mapcar '+ (print (mapcar '* (gather (length (states)) (nth n previous-beliefs)) (action-probabilities n action)) ) current-beliefs))
+		)
+		
 		(print "after summation beliefs")
 		(print current-beliefs)
 		;;make these your current beliefs
@@ -397,5 +398,12 @@ particle is simply a state."
 	
 	
 (defun bayes-filter-test ()
-
+;;defun bayes-filter (action sensor previous-beliefs)
+	(print (action-probabilities 0 :forward)) 
+	(print (action-probabilities 0 :backward)) 
+	;;(print (action-probability ))  	
+	;;action-probability (new-state old-state action)
+      
+	(bayes-filter :forward :even '(.8 .05 .05 .05 .05))
 )
+(bayes-filter-test)
