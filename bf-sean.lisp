@@ -410,6 +410,6 @@ particle is simply a state."
 	(print "sensor test")
 	(print (sensor-probabilities :odd))      
 	(bayes-filter :forward :odd '(.5 .0 .5 .0 .0))
-
+	(print (example-2-particle))
 )
 (bayes-filter-test)
