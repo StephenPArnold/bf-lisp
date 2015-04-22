@@ -338,7 +338,7 @@ particle is simply a state."
 ;;; example two: If you knew you were in room 0,
 ;;; then moved forward twice and backward thrice,
 ;;; and your sensors said even odd even even odd,
-;;; where you you likely to be?
+;;; where are you likely to be?
 
 ;;; with the bayes filter
 
