@@ -55,16 +55,6 @@
 
 (defparameter *debug* nil)
 
-(defun dprint (some-variable &optional (additional-message '()))
-   "Debug Print - useful for allowing error/status messages
-   to be printed while debug=t."
-	(if *debug*
-  	(progn
-    	(if additional-message (print additional-message) nil)
-      	(print some-variable))
-    some-variable))
-
-
 (defparameter *actions* '(:forward :backward))
 (defparameter *states* '(0 1 2 3 4))
 (defparameter *sensors* '(:even :odd))
