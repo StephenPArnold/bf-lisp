@@ -53,6 +53,18 @@
 ;;;;;;; sensor-probability functions instead.  That way if you change your model
 ;;;;;;; you just need to resubmit those three functions.
 
+(setf *debug* nil)
+
+(defun dprint (some-variable &optional (additional-message '()))
+   "Debug Print - useful for allowing error/status messages
+   to be printed while debug=t."
+	(if *debug*
+  	(progn
+    	(if additional-message (print additional-message) nil)
+      	(print some-variable))
+    some-variable))
+
+
 (defparameter *actions* '(:forward :backward))
 (defparameter *states* '(0 1 2 3 4))
 (defparameter *sensors* '(:even :odd))
@@ -233,8 +245,7 @@ state, p2 is the probability for the second state, and so on."
   "Given a possibly non-normalized distribution, in the form of a list of probabilities,
 selects from the distribution randomly and returns the index of the selected element."
 
-;;; IMPLEMENT ME
-
+	(random-elt distribution)
 )
 
 
@@ -273,14 +284,22 @@ of the form ((sample1 weight1) (sample2 weight2) ...)."
   "Given an old-state and an action, selects a new-state at random and returns it
 given the probability distribution P(new-state | old-state, action)."
 
-;;; IMPLEMENT ME
-
+	(let ((x-new (random 1.0)))
+		(dprint x-new)
+		(dolist (new-state (states))
+			(if (< (- x-new (dprint (setf action-prob (action-probability new-state old-state action)))) 0)
+				(return new-state)
+				(setf x-new (- x-new action-prob))
+			)
+		)
+	)
 )
 
+			;;; (defun action-probability (new-state old-state action)
 
 ;; Now we just do the belief update.  Note that beliefs now are different than they
 ;; were in the past: they're particles, each one representing a state.  Also note that
-;; just as you could have sritten select-from-action-probabilities above without even
+;; just as you could have written select-from-action-probabilities above without even
 ;; *having* a distribution, you can do the same for sensor-probability.  That's a major
 ;; strength of the particle filter.  It makes for easier representations of your
 ;; "distributions".
@@ -290,8 +309,18 @@ result, returns a  new belief table about what our new states
 might possibly be.  Belief tables are lists of particles.  Each
 particle is simply a state."
 
-;;; IMPLEMENT ME
-
+	(let ((current-beliefs ()))
+			(print "dolist in particle filter")
+			(print "current beliefs are")
+			(print current-beliefs)
+			(print "previous beliefs are")
+			(print previous-beliefs)
+		(dolist (old-state previous-beliefs current-beliefs)
+			(setf current-beliefs (append current-beliefs (list (dprint (select-from-action-probabilities old-state action)))))
+		)
+		(print "after summation beliefs")
+		(print current-beliefs)
+	)
 )
 
 
@@ -406,4 +435,14 @@ particle is simply a state."
       
 	(bayes-filter :forward :even '(.8 .05 .05 .05 .05))
 )
-(bayes-filter-test)
+;(bayes-filter-test)
+;
+(defun particle-filter-test ()
+;; (defun particle-filter (action sensor previous-beliefs)
+	(let ((b (gather 100 (random-elt *states*))))
+		(format t "~%Particle Filter Inits: ~a~%" (normalize (counts b)))
+		(setf b (particle-filter :forward :odd b))
+		;;(format t "~%Particle Filter Results: ~a~%" b)
+		))
+
+(particle-filter-test)
