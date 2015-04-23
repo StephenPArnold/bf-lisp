@@ -53,7 +53,7 @@
 ;;;;;;; sensor-probability functions instead.  That way if you change your model
 ;;;;;;; you just need to resubmit those three functions.
 
-(setf *debug* nil)
+(defparameter *debug* nil)
 
 (defun dprint (some-variable &optional (additional-message '()))
    "Debug Print - useful for allowing error/status messages
@@ -95,6 +95,15 @@ one-dimensional world, if you move forward (or backward), you
 have a 1/2 probability of accidentally staying put."
         ;;; note that the values in each row must sum to 1
 )
+(defun dprint (some-variable &optional (additional-message '()))
+	"Debug Print - useful for allowing error/status messages
+to be printed while debug=t."
+	(if *debug*
+		(progn 
+			(if additional-message (print additional-message) nil) 
+			(print some-variable))
+		some-variable))
+
 
 (defun action-probability (new-state old-state action)
         "Returns the probability that, given an action and 
@@ -175,10 +184,10 @@ per old state, of the probability of transitioning to the new state from
 that old state given the action"
 ;; get sta
 	;;action-probability (new-state old-state action)
-	(print "args are")
-	(print new-state)
-	(print action)
-	(print "/")
+	(dprint "args are")
+	(dprint new-state)
+	(dprint action)
+	(dprint "/")
 	(let ((n -1))
 		(gather (length (states)) (incf n) (action-probability n new-state action))
 	)
@@ -187,7 +196,9 @@ that old state given the action"
 (defun sensor-probabilities (sensor)
   "Given a sensor value, returns a list of probabilities, one
 per state, of the probability of receiving that sensor value given the state"
-
+;;(defun sensor-probability (sensor state))
+	(let ((n -1))
+		(gather (length (states)) (incf n) (sensor-probability sensor n)))
 ;;; IMPLEMENT ME
 
 )
@@ -204,19 +215,21 @@ state, p2 is the probability for the second state, and so on."
 	
 	(let ((current-beliefs (copy-list previous-beliefs)))
 		(setf current-beliefs (mapcar '- previous-beliefs  previous-beliefs)) ;; i want it all zeros but the same size as previous beliefs, easiest way to do it i could think of, not efficient
-		(print "current beliefs are")
-		(print current-beliefs)
-		(print "previous beliefs are")
-		(print previous-beliefs)
+		(dprint "current beliefs are")
+		(dprint current-beliefs)
+		(dprint "previous beliefs are")
+		(dprint previous-beliefs)
 		;;call action probabilities, once for each previous belief. 
 		(dotimes (n (length (states)))
-			(setf current-beliefs (mapcar '+ (print (mapcar '* (gather (length (states)) (nth n previous-beliefs)) (action-probabilities n action)) ) current-beliefs))
+			(setf current-beliefs (mapcar '+ (dprint (mapcar '* (gather (length (states)) (nth n previous-beliefs)) (action-probabilities n action)) ) current-beliefs))
 		)
 		
-		(print "after summation beliefs")
-		(print current-beliefs)
+		(dprint "after summation beliefs")
+		(dprint current-beliefs)
 		;;make these your current beliefs
-		
+		(setf current-beliefs (mapcar '* (sensor-probabilities sensor) current-beliefs))
+		(dprint "fina result after evidence:")
+		(dprint (normalize current-beliefs))
 		;;call sensor-probabilities
 		
 		;; apply sensor probabilities to current beliefs
@@ -403,7 +416,7 @@ particle is simply a state."
     (setf b (bayes-filter :backward :even b))
     (setf b (bayes-filter :backward :even b))
     (setf b (bayes-filter :backward :odd b))
-    (format t "Bayes Filter Results: ~a" b)))
+    (format t "Bayes Filter Results: ~a" (normalize b))))
 
 
 
@@ -432,8 +445,12 @@ particle is simply a state."
 	(print (action-probabilities 0 :backward)) 
 	;;(print (action-probability ))  	
 	;;action-probability (new-state old-state action)
-      
-	(bayes-filter :forward :even '(.8 .05 .05 .05 .05))
+	(print "sensor test")
+	(print (sensor-probabilities :odd))      
+	(bayes-filter :forward :odd '(.5 .0 .5 .0 .0))
+	(print (example-2-bayes))
+	(print (example-1-bayes))
+
 )
 ;(bayes-filter-test)
 ;
