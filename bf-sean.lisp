@@ -312,7 +312,6 @@ given the probability distribution P(new-state | old-state, action)."
 result, returns a  new belief table about what our new states 
 might possibly be.  Belief tables are lists of particles.  Each
 particle is simply a state."
-
 	(let ((current-beliefs ())
 				(current-weights ()))
 			(dprint current-beliefs "current beliefs are")
@@ -426,32 +425,22 @@ particle is simply a state."
 ;;; 	
 	
 (defun bayes-filter-test ()
-;;defun bayes-filter (action sensor previous-beliefs)
-	(print (action-probabilities 0 :forward)) 
-	(print (action-probabilities 0 :backward)) 
-	;;(print (action-probability ))  	
-	;;action-probability (new-state old-state action)
-	(print "sensor test")
-	(print (sensor-probabilities :odd))      
-	(bayes-filter :forward :odd '(.5 .0 .5 .0 .0))
-	(print (example-2-bayes))
-	(print (example-1-bayes))
+	(dprint (action-probabilities 0 :forward)) 
+	(dprint (action-probabilities 0 :backward)) 
+	(dprint "sensor test")
+	(dprint (sensor-probabilities :odd))    
+	(print "bayes filter small example:")  
+	(print (bayes-filter :forward :even '(.5 .5 .5 .5 .5)))
 
 )
 
-(bayes-filter-test)
 
 (defun particle-filter-test ()
-;; (defun particle-filter (action sensor previous-beliefs)
-  (print (action-probabilities 0 :forward))
-  (print (action-probabilities 0 :backward))
-	;;(print (action-probability ))   
-	;;action-probability (new-state old-state action)
-	(print "sensor test")
-	(print (sensor-probabilities :odd))
-	;;(particle-filter :forward :odd '(.5 .0 .5 .0 .0))
-	(print (example-2-particle))
-  (print (example-1-particle))
-)
+	(print "Particle filter small example:")
+	(let ((b (gather 10000 0)))
+    		(setf b (particle-filter :forward :even b))
 
+    	(format t "Particle Filter Results: ~a" (normalize (counts b))))	
+)
+(bayes-filter-test)
 (particle-filter-test)
