@@ -258,7 +258,7 @@ of the form ((sample1 weight1) (sample2 weight2) ...)."
 			)
 		(dprint max_w "max_w: ")
 		(dotimes (n (length samples-and-weights))
-			(setf beta (+ beta (random (* 2.0 max_w))))
+			(setf beta (* (random 1.0) max_w 2))
 			(dprint beta "beta: ")
 			(setf index (random (length samples-and-weights)))
 			(loop do
