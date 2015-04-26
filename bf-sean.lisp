@@ -24,9 +24,6 @@
 ;;;;;;; 4. Explore different situations in your new problem domain.
 
 
-
-
-
 ;;;;;;; OUR EXAMPLE MODEL
 ;;;;;;;
 ;;;;;;; This simple model is discrete, to keep things simple -- but in fact
@@ -103,10 +100,7 @@ old state, the new state will be achieved" ;;returns p(newstate|oldstate, action
                 (position old-state *states*)
                 (position new-state *states*)))
 
-
-
 ;;;; A description of our sensor model
-
 
 (defparameter *sensor-model*
         #2A(    (0.95 0.05)
@@ -128,11 +122,6 @@ sensor will be the given value"
         (aref *sensor-model* 
                 (position state *states*)
                 (position sensor *sensors*)))
-
-
-
-
-
 
 ;;;;;; Some utility functions for normalizing tables, 
 ;;;;;; creating particles, and counting
@@ -157,10 +146,6 @@ in -body- is appended to a list.  The full list is then returned."
 (defun counts (distribution)
   "Counts the number of times a state particle appears in the distribution"
   (mapcar (lambda (state) (count state distribution)) *states*))
-
-
-
-
 
 
 ;;;;; Table-based Bayes Filter.  The function BAYES-FILTER takes a collection of
@@ -218,7 +203,7 @@ state, p2 is the probability for the second state, and so on."
 		(dprint current-beliefs)
 		;;make these your current beliefs
 		(setf current-beliefs (mapcar '* (sensor-probabilities sensor) current-beliefs))
-		(dprint "fina result after evidence:")
+		(dprint "final result after evidence:")
 		(dprint (normalize current-beliefs))
 		;;call sensor-probabilities
 		
@@ -227,17 +212,11 @@ state, p2 is the probability for the second state, and so on."
 )
 
 
-
-
-
-
 ;;;;; The particle filter.  The function PARTICLE-FILTER is similar to BAYES-FILTER
 ;;;;; except that its collections of beliefs take the form of BAGS of STATES.  The same
 ;;;;; state may repeatedly appear many times in this bag.  The number of times a state is
 ;;;;; is in the bag basically approximates the probability that we believe we're likely in
 ;;;;; that state.
-
-
 
 
 ;; I use this function to sample a random index from a distribution
@@ -268,11 +247,33 @@ list.  The function -weight- provides the resulting element that should be retur
 selected.  By default these are #'first and #'second, presuming that the provided distribution is
 of the form ((sample1 weight1) (sample2 weight2) ...)."
 
-;;; IMPLEMENT ME
-;;; Note: this is the most complex function.
 
+	(let ((beta 0.0)
+				(max_w 0.0)
+				(new-beliefs ())
+				(index (random (length samples-and-weights))))
+		(dprint index "index: ")
+		(dotimes (n (length samples-and-weights))
+			(setf max_w (max max_w (funcall weight (nth n samples-and-weights))))
+			)
+		(dprint max_w "max_w: ")
+		(dotimes (n (length samples-and-weights))
+			(setf beta (+ beta (random (* 2.0 max_w))))
+			(dprint beta "beta: ")
+			(loop do
+						(setf beta (- beta (funcall weight (nth index samples-and-weights))))
+						(dprint beta "beta: ")
+						(setf index (mod (incf index) (length samples-and-weights)))
+						(dprint index "new index: ")
+				while (> beta (funcall weight (nth index samples-and-weights)))
+			)
+			(setf new-beliefs (append new-beliefs (list (funcall sample (nth index samples-and-weights)))))
+		)
+		(dprint new-beliefs "new beliefs: ")
+	)
 )
 
+;;	(dprint new-beliefs "new beliefs: ")
 
 
 ;; Here I grab a random new state selected from the distribution of old ones.
@@ -287,18 +288,18 @@ of the form ((sample1 weight1) (sample2 weight2) ...)."
   "Given an old-state and an action, selects a new-state at random and returns it
 given the probability distribution P(new-state | old-state, action)."
 
-	(let ((x-new (random 1.0)))
-		(dprint x-new)
+	(let ((random-new-state (random 1.0)))
+		(dprint random-new-state)
 		(dolist (new-state (states))
-			(if (< (- x-new (dprint (setf action-prob (action-probability new-state old-state action)))) 0)
+			(if (< (- random-new-state (dprint (setf action-prob (action-probability new-state old-state action)))) 0)
 				(return new-state)
-				(setf x-new (- x-new action-prob))
+				(setf random-new-state (- random-new-state action-prob))
 			)
 		)
 	)
 )
 
-			;;; (defun action-probability (new-state old-state action)
+;;; (defun action-probability (new-state old-state action)
 
 ;; Now we just do the belief update.  Note that beliefs now are different than they
 ;; were in the past: they're particles, each one representing a state.  Also note that
@@ -312,23 +313,24 @@ result, returns a  new belief table about what our new states
 might possibly be.  Belief tables are lists of particles.  Each
 particle is simply a state."
 
-	(let ((current-beliefs ()))
-			(print "dolist in particle filter")
-			(print "current beliefs are")
-			(print current-beliefs)
-			(print "previous beliefs are")
-			(print previous-beliefs)
+	(let ((current-beliefs ())
+				(current-weights ()))
+			(dprint current-beliefs "current beliefs are")
+			(dprint previous-beliefs "previous beliefs are")
 		(dolist (old-state previous-beliefs current-beliefs)
 			(setf current-beliefs (append current-beliefs (list (dprint (select-from-action-probabilities old-state action)))))
 		)
-		(print "after summation beliefs")
-		(print current-beliefs)
+			(dprint current-beliefs "after particle movement")
+		(dolist (old-state current-beliefs current-weights)
+			(setf current-weights (append current-weights (list (dprint (sensor-probability sensor old-state)))))
+		)
+			(dprint current-weights "after sample measurement")
+		(setf samples-and-weights (mapcar #'list current-beliefs current-weights))
+			(dprint samples-and-weights "samples and weights")
+		(setf current-beliefs (resample-distribution samples-and-weights))
+			(dprint current-beliefs "returned from resampling:")
 	)
 )
-
-
-
-
 
 
 
@@ -338,7 +340,6 @@ particle is simply a state."
 
 ;;;; For convenience:
 (defvar *b*)
-
 
 ;;;; Example 1 : move forward through the environment,
 ;;;; then back to where you started.  You don't know where
@@ -420,14 +421,9 @@ particle is simply a state."
     (setf b (particle-filter :backward :odd b))
     (format t "Particle Filter Results: ~a" (normalize (counts b)))))
 
-	
-	
-	
-	
-	
-	
-	
-	
+;;; 
+;;; Test Functions
+;;; 	
 	
 (defun bayes-filter-test ()
 ;;defun bayes-filter (action sensor previous-beliefs)
@@ -442,14 +438,20 @@ particle is simply a state."
 	(print (example-1-bayes))
 
 )
-;(bayes-filter-test)
-;
+
+(bayes-filter-test)
+
 (defun particle-filter-test ()
 ;; (defun particle-filter (action sensor previous-beliefs)
-	(let ((b (gather 100 (random-elt *states*))))
-		(format t "~%Particle Filter Inits: ~a~%" (normalize (counts b)))
-		(setf b (particle-filter :forward :odd b))
-		;;(format t "~%Particle Filter Results: ~a~%" b)
-		))
+  (print (action-probabilities 0 :forward))
+  (print (action-probabilities 0 :backward))
+	;;(print (action-probability ))   
+	;;action-probability (new-state old-state action)
+	(print "sensor test")
+	(print (sensor-probabilities :odd))
+	;;(particle-filter :forward :odd '(.5 .0 .5 .0 .0))
+	(print (example-2-particle))
+  (print (example-1-particle))
+)
 
 (particle-filter-test)
