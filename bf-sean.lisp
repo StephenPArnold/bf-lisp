@@ -437,7 +437,7 @@ particle is simply a state."
 
 (defun particle-filter-test ()
 	(print "Particle filter small example:")
-	(let ((b (gather 10000 0)))
+	(let ((b (gather 10000 0))) ;;(random-elt *states*))))
     		(setf b (particle-filter :forward :even b))
 
     	(format t "Particle Filter Results: ~a" (normalize (counts b))))	
