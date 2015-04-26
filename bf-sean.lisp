@@ -248,10 +248,10 @@ selected.  By default these are #'first and #'second, presuming that the provide
 of the form ((sample1 weight1) (sample2 weight2) ...)."
 
 
-	(let ((beta 0.0)
+	(let ((index 0)
+				(beta 0.0)
 				(max_w 0.0)
-				(new-beliefs ())
-				(index (random (length samples-and-weights))))
+				(new-beliefs ()))
 		(dprint index "index: ")
 		(dotimes (n (length samples-and-weights))
 			(setf max_w (max max_w (funcall weight (nth n samples-and-weights))))
@@ -260,6 +260,7 @@ of the form ((sample1 weight1) (sample2 weight2) ...)."
 		(dotimes (n (length samples-and-weights))
 			(setf beta (+ beta (random (* 2.0 max_w))))
 			(dprint beta "beta: ")
+			(setf index (random (length samples-and-weights)))
 			(loop do
 						(setf index (mod (incf index) (length samples-and-weights)))	
 						(setf beta (- beta (funcall weight (nth index samples-and-weights))))
