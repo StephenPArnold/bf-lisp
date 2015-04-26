@@ -266,7 +266,7 @@ of the form ((sample1 weight1) (sample2 weight2) ...)."
 						(setf beta (- beta (funcall weight (nth index samples-and-weights))))
 						(dprint beta "beta: ")
 						(dprint index "new index: ")
-				while (> beta (funcall weight (nth index samples-and-weights)))
+				while (> beta 0)
 			)
 			(setf new-beliefs (append new-beliefs (list (funcall sample (nth index samples-and-weights)))))
 		)
