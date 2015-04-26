@@ -261,9 +261,9 @@ of the form ((sample1 weight1) (sample2 weight2) ...)."
 			(setf beta (+ beta (random (* 2.0 max_w))))
 			(dprint beta "beta: ")
 			(loop do
+						(setf index (mod (incf index) (length samples-and-weights)))	
 						(setf beta (- beta (funcall weight (nth index samples-and-weights))))
 						(dprint beta "beta: ")
-						(setf index (mod (incf index) (length samples-and-weights)))
 						(dprint index "new index: ")
 				while (> beta (funcall weight (nth index samples-and-weights)))
 			)
@@ -430,17 +430,18 @@ particle is simply a state."
 	(dprint "sensor test")
 	(dprint (sensor-probabilities :odd))    
 	(print "bayes filter small example:")  
-	(print (bayes-filter :forward :even '(.5 .5 .5 .5 .5)))
-
+	(print (bayes-filter :forward :even '(1 0 0 0 0)))
+	(example-2-bayes)
 )
 
 
 (defun particle-filter-test ()
 	(print "Particle filter small example:")
-	(let ((b (gather 10000 0)))
+	(let ((b (gather 100000 0)))
     		(setf b (particle-filter :forward :even b))
 
     	(format t "Particle Filter Results: ~a" (normalize (counts b))))	
+	(example-2-particle)
 )
 (bayes-filter-test)
 (particle-filter-test)
